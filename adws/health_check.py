@@ -35,6 +35,7 @@ from pydantic import BaseModel
 
 # Import git repo functions from github module
 from github import get_repo_url, extract_repo_path, make_issue_comment
+from utils import get_default_model
 
 # Load environment variables
 load_dotenv()
@@ -167,8 +168,8 @@ def check_claude_code() -> CheckResult:
         ) as tmp:
             output_file = tmp.name
 
-        # Run Claude Code - use ANTHROPIC_MODEL from env if set
-        model = os.getenv("ANTHROPIC_MODEL", "us.anthropic.claude-3-5-haiku-20241022-v1:0")
+        # Run Claude Code - use ANTHROPIC_MODEL from env or default
+        model = get_default_model()
         cmd = [
             claude_path,
             "-p",

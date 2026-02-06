@@ -13,6 +13,7 @@ export AWS_REGION="eu-west-3"
 export CLAUDE_CODE_USE_BEDROCK="true"
 export CLAUDE_CODE_PATH="/path/to/claude"  # Optional, defaults to "claude"
 export GITHUB_PAT="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Optional, only if using different account than 'gh auth login'
+export ANTHROPIC_MODEL="us.anthropic.claude-3-5-sonnet-20241022-v2:0"  # Optional, defaults to Sonnet 3.5
 ```
 
 ### 2. Install Prerequisites
@@ -219,9 +220,22 @@ Each workflow run gets a unique 8-character ID (e.g., `a1b2c3d4`) that appears i
 - Git commits and PRs
 
 ### Model Selection
-Edit `agent.py` line 129 to change model:
-- `model="sonnet"` - Faster, lower cost (default)
-- `model="opus"` - Better for complex tasks
+Configure the model using the `ANTHROPIC_MODEL` environment variable:
+```bash
+# Default (Claude 3.5 Sonnet)
+export ANTHROPIC_MODEL="us.anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+# Claude 3.5 Haiku (faster, lower cost)
+export ANTHROPIC_MODEL="us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
+# Claude Opus 4 (best for complex tasks)
+export ANTHROPIC_MODEL="us.anthropic.claude-opus-4-20250514-v1:0"
+
+# European region models
+export ANTHROPIC_MODEL="eu.anthropic.claude-sonnet-4-5-20250929-v1:0"
+```
+
+The model ARN must be a valid AWS Bedrock model identifier. If not set, defaults to Claude 3.5 Sonnet.
 
 ### Output Structure
 ```
