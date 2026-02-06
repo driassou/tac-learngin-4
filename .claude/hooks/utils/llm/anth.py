@@ -11,10 +11,14 @@ import os
 import sys
 from dotenv import load_dotenv
 
+# Default Bedrock model ID for Claude
+DEFAULT_BEDROCK_MODEL = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+
 
 def prompt_llm(prompt_text):
     """
-    Base Anthropic LLM prompting method using fastest model.
+    Base Anthropic LLM prompting method using fastest model via AWS Bedrock.
+    Uses boto3's default credential chain for authentication.
 
     Args:
         prompt_text (str): The prompt to send to the model
@@ -24,17 +28,19 @@ def prompt_llm(prompt_text):
     """
     load_dotenv()
 
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        return None
+    aws_region = os.getenv("AWS_REGION", "eu-west-3")
 
     try:
-        import anthropic
+        from anthropic import AnthropicBedrock
 
-        client = anthropic.Anthropic(api_key=api_key)
+        # Use boto3's default credential chain (env vars, ~/.aws/credentials, IAM role)
+        client = AnthropicBedrock(aws_region=aws_region)
+
+        # Get model from environment or use default
+        model = os.getenv("ANTHROPIC_MODEL", DEFAULT_BEDROCK_MODEL)
 
         message = client.messages.create(
-            model="claude-3-5-haiku-20241022",  # Fastest Anthropic model
+            model=model,
             max_tokens=100,
             temperature=0.7,
             messages=[{"role": "user", "content": prompt_text}],
@@ -57,14 +63,14 @@ def generate_completion_message():
 
     if engineer_name:
         name_instruction = f"Sometimes (about 30% of the time) include the engineer's name '{engineer_name}' in a natural way."
-        examples = f"""Examples of the style: 
+        examples = f"""Examples of the style:
 - Standard: "Work complete!", "All done!", "Task finished!", "Ready for your next move!"
 - Personalized: "{engineer_name}, all set!", "Ready for you, {engineer_name}!", "Complete, {engineer_name}!", "{engineer_name}, we're done!" """
     else:
         name_instruction = ""
         examples = """Examples of the style: "Work complete!", "All done!", "Task finished!", "Ready for your next move!" """
 
-    prompt = f"""Generate a short, friendly completion message for when an AI coding assistant finishes a task. 
+    prompt = f"""Generate a short, friendly completion message for when an AI coding assistant finishes a task.
 
 Requirements:
 - Keep it under 10 words
@@ -105,7 +111,7 @@ def main():
             if response:
                 print(response)
             else:
-                print("Error calling Anthropic API")
+                print("Error calling Anthropic API via Bedrock")
     else:
         print("Usage: ./anth.py 'your prompt here' or ./anth.py --completion")
 

@@ -62,7 +62,8 @@ class HealthCheckResult(BaseModel):
 def check_env_vars() -> CheckResult:
     """Check required environment variables."""
     required_vars = {
-        "ANTHROPIC_API_KEY": "Anthropic API Key for Claude Code",
+        "AWS_BEARER_TOKEN_BEDROCK": "AWS Bearer Token for Bedrock authentication",
+        "AWS_REGION": "AWS Region for Bedrock (e.g., eu-west-3)",
         "CLAUDE_CODE_PATH": "Path to Claude Code CLI (defaults to 'claude')",
     }
 
@@ -70,6 +71,8 @@ def check_env_vars() -> CheckResult:
         "GITHUB_PAT": "(Optional) GitHub Personal Access Token - only needed if you want ADW to use a different GitHub account than 'gh auth login'",
         "E2B_API_KEY": "(Optional) E2B API Key for sandbox environments",
         "CLOUDFLARED_TUNNEL_TOKEN": "(Optional) Cloudflare tunnel token for webhook exposure",
+        "ANTHROPIC_MODEL": "(Optional) Custom Bedrock model ARN",
+        "CLAUDE_CODE_USE_BEDROCK": "(Optional) Enable Bedrock mode (defaults to true)",
     }
 
     missing_required = []
@@ -97,6 +100,7 @@ def check_env_vars() -> CheckResult:
             "missing_required": missing_required,
             "missing_optional": missing_optional,
             "claude_code_path": os.getenv("CLAUDE_CODE_PATH", "claude"),
+            "aws_region": os.getenv("AWS_REGION", "not set"),
         },
     )
 
@@ -163,13 +167,14 @@ def check_claude_code() -> CheckResult:
         ) as tmp:
             output_file = tmp.name
 
-        # Run Claude Code
+        # Run Claude Code - use ANTHROPIC_MODEL from env if set
+        model = os.getenv("ANTHROPIC_MODEL", "us.anthropic.claude-3-5-haiku-20241022-v1:0")
         cmd = [
             claude_path,
             "-p",
             test_prompt,
             "--model",
-            "claude-3-5-haiku-20241022",
+            model,
             "--output-format",
             "stream-json",
             "--verbose",
@@ -291,8 +296,9 @@ def run_health_check() -> HealthCheckResult:
         if gh_check.error:
             result.errors.append(gh_check.error)
 
-    # Check Claude Code - only if we have the API key
-    if os.getenv("ANTHROPIC_API_KEY"):
+    # Check Claude Code - only if we have AWS Bedrock credentials
+    has_bedrock_creds = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
+    if has_bedrock_creds:
         claude_check = check_claude_code()
         result.checks["claude_code"] = claude_check
         if not claude_check.success:
@@ -302,7 +308,7 @@ def run_health_check() -> HealthCheckResult:
     else:
         result.checks["claude_code"] = CheckResult(
             success=False,
-            details={"skipped": True, "reason": "ANTHROPIC_API_KEY not set"},
+            details={"skipped": True, "reason": "AWS Bedrock credentials not set"},
         )
 
     return result
@@ -365,8 +371,10 @@ def main():
     # Print next steps
     if not result.success:
         print("\n📝 Next Steps:")
-        if any("ANTHROPIC_API_KEY" in e for e in result.errors):
-            print("   1. Set ANTHROPIC_API_KEY in your .env file")
+        if any("AWS_BEARER_TOKEN_BEDROCK" in e or "AWS_REGION" in e for e in result.errors):
+            print("   1. Set AWS Bedrock credentials in your .env file:")
+            print("      - AWS_BEARER_TOKEN_BEDROCK")
+            print("      - AWS_REGION (e.g., eu-west-3)")
         if any("GITHUB_PAT" in e for e in result.errors):
             print("   2. Set GITHUB_PAT in your .env file")
         if any("GitHub CLI" in e for e in result.errors):

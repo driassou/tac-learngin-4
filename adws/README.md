@@ -8,7 +8,9 @@ ADW automates software development by integrating GitHub issues with Claude Code
 
 ```bash
 export GITHUB_REPO_URL="https://github.com/owner/repository"
-export ANTHROPIC_API_KEY="sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export AWS_BEARER_TOKEN_BEDROCK="bedrock-api-key-xxxxxxxxxxxx"
+export AWS_REGION="eu-west-3"
+export CLAUDE_CODE_USE_BEDROCK="true"
 export CLAUDE_CODE_PATH="/path/to/claude"  # Optional, defaults to "claude"
 export GITHUB_PAT="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Optional, only if using different account than 'gh auth login'
 ```
@@ -174,7 +176,7 @@ uv run trigger_webhook.py
 ### Environment Issues
 ```bash
 # Check required variables
-env | grep -E "(GITHUB|ANTHROPIC|CLAUDE)"
+env | grep -E "(GITHUB|AWS|CLAUDE)"
 
 # Verify GitHub auth
 gh auth status
