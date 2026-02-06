@@ -12,6 +12,15 @@ def make_adw_id() -> str:
     return str(uuid.uuid4())[:8]
 
 
+def get_default_model() -> str:
+    """Get the default Bedrock model ARN from environment or return a sensible default.
+
+    Returns:
+        Bedrock model ARN string (e.g., 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
+    """
+    return os.getenv("ANTHROPIC_MODEL", "us.anthropic.claude-3-5-sonnet-20241022-v2:0")
+
+
 def setup_logger(adw_id: str, trigger_type: str = "adw_plan_build") -> logging.Logger:
     """Set up logger that writes to both console and file using adw_id.
     

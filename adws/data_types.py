@@ -106,7 +106,7 @@ class AgentPromptRequest(BaseModel):
     prompt: str
     adw_id: str
     agent_name: str = "ops"
-    model: Literal["sonnet", "opus"] = "opus"
+    model: str = "us.anthropic.claude-opus-4-20250514-v1:0"
     dangerously_skip_permissions: bool = False
     output_file: str
 
@@ -126,7 +126,7 @@ class AgentTemplateRequest(BaseModel):
     slash_command: SlashCommand
     args: List[str]
     adw_id: str
-    model: Literal["sonnet", "opus"] = "sonnet"
+    model: str = "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 
 class ClaudeCodeResultMessage(BaseModel):
