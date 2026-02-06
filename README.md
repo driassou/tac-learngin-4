@@ -14,7 +14,7 @@ A web application that converts natural language queries to SQL using AI, built 
 
 - Python 3.10+
 - Node.js 18+
-- OpenAI API key and/or Anthropic API key
+- OpenAI API key and/or AWS Bedrock access (for Anthropic Claude)
 - 'gh' github cli
 - astral uv
 
@@ -34,7 +34,7 @@ npm install
 
 ### 2. Environment Configuration
 
-Set up your API keys in the server directory:
+Set up your environment variables:
 
 ```bash
 cp .env.sample .env
@@ -45,8 +45,19 @@ and
 ```bash
 cd app/server
 cp .env.sample .env
-# Edit .env and add your API keys
 ```
+
+Edit the `.env` files and configure your credentials:
+
+**Root `.env`** (for Claude Code CLI and ADW system):
+- `AWS_BEARER_TOKEN_BEDROCK` - Bearer token for Bedrock authentication
+- `AWS_REGION` - AWS Region (e.g., `eu-west-3`)
+- `ANTHROPIC_MODEL` - (Optional) Custom Bedrock model ARN
+- `CLAUDE_CODE_USE_BEDROCK=true` - Enable Bedrock mode
+
+**Server `.env`** (for LLM-powered SQL generation):
+- `OPENAI_API_KEY` - For OpenAI provider (alternative)
+- `AWS_REGION` - For Anthropic via Bedrock (uses boto3 default credential chain)
 
 ## Quick Start
 
@@ -200,7 +211,7 @@ uv run pytest tests/test_sql_injection.py -v
 
 **Backend won't start:**
 - Check Python version: `python --version` (requires 3.12+)
-- Verify API keys are set: `echo $OPENAI_API_KEY`
+- Verify credentials are set: `echo $AWS_ACCESS_KEY_ID` or `echo $OPENAI_API_KEY`
 
 **Frontend errors:**
 - Clear node_modules: `rm -rf node_modules && npm install`

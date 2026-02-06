@@ -22,7 +22,8 @@ Workflow:
 5. Create PR with full context
 
 Environment Requirements:
-- ANTHROPIC_API_KEY: Anthropic API key
+- AWS_BEARER_TOKEN_BEDROCK: AWS Bearer Token for Bedrock authentication
+- AWS_REGION: AWS Region for Bedrock (e.g., eu-west-3)
 - CLAUDE_CODE_PATH: Path to Claude CLI
 - GITHUB_PAT: (Optional) GitHub Personal Access Token - only if using a different account than 'gh auth login'
 """
@@ -61,7 +62,8 @@ AGENT_PR_CREATOR = "pr_creator"
 def check_env_vars(logger: Optional[logging.Logger] = None) -> None:
     """Check that all required environment variables are set."""
     required_vars = [
-        "ANTHROPIC_API_KEY",
+        "AWS_BEARER_TOKEN_BEDROCK",
+        "AWS_REGION",
         "CLAUDE_CODE_PATH",
     ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]

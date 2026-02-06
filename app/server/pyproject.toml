@@ -12,6 +12,7 @@ dependencies = [
     "anthropic==0.54.0",
     "pandas==2.3.0",
     "python-dotenv==1.0.1",
+    "boto3>=1.42.43",
 ]
 
 [project.optional-dependencies]
